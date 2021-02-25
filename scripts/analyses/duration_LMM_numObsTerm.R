@@ -14,7 +14,8 @@ mdf <- read.csv("data/LMM_data/phenoTraits_data_withNumObsData.csv", stringsAsFa
   mutate(numObs = scale(numObs)) # Note the other variables were already scaled
 
 ########## Onset Models ###########
-m1dur <- lmer(duration ~ temp + pop + prec + prec_seas + temp_seas + temp:pop + temp:prec +
+m1dur <- lmer(duration ~ temp + pop + prec + prec_seas + temp_seas + 
+                temp:pop + temp:prec +
                 numObs + 
                 (1|id_cells) + (1|scientificName) +
                 (0 + temp | scientificName) + 
