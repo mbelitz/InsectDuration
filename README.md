@@ -33,5 +33,31 @@ Subdirectory containing trait information for species list, including the specie
 ## Figures
 Subdirectory to save figures to. Contains raw .pngs of figures used in manuscript included Supporting Information figures. 
 
+## scripts
+Contains R scripts used to generate phenology estimates, run analyses, and generate figures. Contains three subdirectories for these three aims.
+
+### analyses
+Code to run data analyses (linear mixed models (LMM) and phylogenetic linear mixed models (PLMM))
+- onset_LMM_numObsTerm.R runs script to generate onset LMM and onset PLMM.
+- offset_LMM_numObsTerm.R runs script to generate offset LMM and offset PLMM.
+- duration_LMM_numObsTerm.R runs script to generate duration LMM and offset PLMM.
+
+### figures
+Code to generate figures used in manuscript.
+- interactionFigures.R runs script to generate Figs. 3, 4, & 5
+- model_assumptions.R runs script to generate SI Fig. 1
+- R2_Fig.R runs script to generate SI Fig. 3
+- random_effects_posteriorDistributions.r runs scrip to generate SI Fig. 2
+- studyArea.R holds code to generate Fig. 2
+- studySpp.R has the code to generate Fig. 1
+
+### phenoestimates
+Code to generate phenology estimates. NOTE THAT THESE SCRIPTS WILL NOT RUN IF YOU SOURCE THEM. In order to run these scripts without a bug, you will need to unzip the data in the occurrence_records subdirectory and change the paths in the scripts to the correct locations. SECOND NOTE: Running this script would take a while, due to bootstrapping to get confidence intervals around the phenology estimate. 
+- 00_pkg_functions.R holds code for functions used in the following scripts.
+- combine_estimates_25km.R script that combines phenology estimate outputs into a single dataframe.
+- running_phenesse_25km.R script that generates phenology estimates through multiple taxon groups. 
+
+## Tables
+Subdirectory to save Table result outputs. Contains manipulated .xlsx file with all LMM results in single location. PGLMM results are saved as .html files and split up by fixed effects (FE) and random effects (RE) results.
 
 
