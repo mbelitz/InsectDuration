@@ -1,6 +1,6 @@
 # InsectDuration
 Code and data used to generate results and figures of "Climate drivers of adult insect activity are conditioned by life history traits" manuscript.
-If you download or clone this repository, you can fully replicate LMM and PLMM results and figures. We also release the cleaned occurrence records datasets that were used to estimate phenology metrics.
+If you download or clone this repository, you can fully replicate LMM and PLMM results and figures. We also release the cleaned occurrence records datasets that were used to estimate phenology metrics. Scored trait data can be downloaded in the data/traits subdirectory. 
 
 ## A brief overview of what is found in each directory and subdirectory
 
