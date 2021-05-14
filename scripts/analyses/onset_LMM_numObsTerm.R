@@ -9,7 +9,7 @@ library(geoR)
 # read in data
 # removed D. undecimpunctata from analyses b/c there is no true diapause in this species
 # removed L. cyanea b/c it wasn't in phylogeny
-mdf <- read.csv("data/LMM_data/phenoTraits_data_withNumObsData.csv", stringsAsFactors = FALSE) %>% 
+mdf <- read.csv("data/LMM_data/phenoTraits_data_withNumObsData_updatedSeasTrat.csv", stringsAsFactors = FALSE) %>% 
   filter(scientificName != "Diabrotica undecimpunctata") %>% 
   filter(scientificName != "Libellula cyanea") %>% 
   mutate(numObs = scale(numObs)) # Note the other variables were already scaled
@@ -143,7 +143,7 @@ eusocial <- c("Bombus bimaculatus",
 
 tree_sp <- insect_tree3$tip.label
 
-mdf2 <- read.csv("data/LMM_data/phenoTraits_data_withNumObsData.csv", stringsAsFactors = FALSE) %>% 
+mdf2 <- read.csv("data/LMM_data/phenoTraits_data_withNumObsData_updatedSeasTrat.csv", stringsAsFactors = FALSE) %>% 
   filter(scientificName != "Diabrotica undecimpunctata") %>% 
   mutate(numObs = scale(numObs))
 
