@@ -2,7 +2,11 @@ library(phyr)
 library(tidyverse)
 library(stringr)
 
-load("ModelOutputs/resubmission/pglmm_onset.Rdata")
+load("ModelOutputs/resubmission/pglmm_onset.Rdata") 
+# note that due to huge file size of pglmm_onset.Rdata, .Rdata is not saved
+# in GitHub directory. Please run /scripts/analyses/spatial_PLMM.R through line 
+# 172 to make your own pglmm_onset.Rdata file
+
 # Onset Posterior distributions
 
 x <- pglmm_onset
@@ -79,6 +83,9 @@ on_re_pd <- ggplot(re_on, aes(val, var, height = ..density..)) +
 
 # Offset Posterior distributions
 load("ModelOutputs/resubmission/pglmm_offset.Rdata")
+# note that due to huge file size of pglmm_offset.Rdata, .Rdata is not saved
+# in GitHub directory. Please run /scripts/analyses/spatial_PLMM_offset.R through line 
+# 309 to make your own pglmm_offset.Rdata file
 
 x <- pglmm_offset_sp
 n_samp <- 1000
@@ -154,6 +161,9 @@ off_re_pd <- ggplot(re_off, aes(val, var, height = ..density..)) +
 
 # Duration Posterior distributions
 load("ModelOutputs/resubmission/pglmm_duration.Rdata")
+# note that due to huge file size of pglmm_duration.Rdata, .Rdata is not saved
+# in GitHub directory. Please run /scripts/analyses/spatial_PLMM_duration.R through line 
+# 278 to make your own pglmm_duration.Rdata file
 
 x <- pglmm_duration_sp
 n_samp <- 1000
