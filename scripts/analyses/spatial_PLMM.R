@@ -167,6 +167,10 @@ pglmm_onset <- pglmm(onset ~ temp + pop + prec + temp_seas + numObs +
                      cov_ranef = list(scientificName = insect_tree4), 
                      bayes = TRUE)
 
+# save model output for faster figure making
+# note this line is commented out b/c it takes a while to do, if needed, please un-comment and run line
+# save(pglmm_onset, file = "ModelOutputs/resubmission/pglmm_onset.Rdata")
+
 summary(pglmm_onset)
 
 re <- phyr::ranef(pglmm_onset) %>% 
@@ -174,8 +178,8 @@ re <- phyr::ranef(pglmm_onset) %>%
 fe <- phyr::fixef(pglmm_onset) %>% 
   knitr::kable() 
 
-kableExtra::save_kable(fe, file = "Tables/resubmission/pglmm_FE_onset.html")
-kableExtra::save_kable(re, file = "Tables/resubmission/pglmm_RE_onset.html")
+kableExtra::save_kable(fe, file = "Tables/pglmm_FE_onset.html")
+kableExtra::save_kable(re, file = "Tables/pglmm_RE_onset.html")
 
 inla_onset = pglmm_onset$inla.model
 summary(inla_onset)
@@ -230,49 +234,7 @@ onset_correlogram_plot <- ggplot() +
   labs(x = "Distance", y = "Moran's I", fill = "P-Value") +
   theme_classic()
 
+onset_correlogram_plot # no autocorrelation found at closest spatial lag, so spatial model not made
+
+# save plot as Rdata to make multipanel Moran's I plot for SI
 save(onset_correlogram_plot, file = "Figures/resubmission/onset_correlogram_plot.Rdata")
-
-## Add spatial component to pglmm
-
-# set up spatial correlation covariance matrix
-## grab coordinates for each unique cell
-cell_id <- dplyr::distinct(mdf_phylo_spp, id_cells, .keep_all = T) %>% 
-  dplyr::select(id_cells, lon, lat)
-x.coord <- cell_id$lon
-y.coord <- cell_id$lat
-
-nsite <- length(x.coord)
-
-# generate matrix
-Dist <- matrix(0, nrow = nsite, ncol = nsite)
-for (i in 1:nsite)
-  for (j in 1:nsite)
-    Dist[i, j] <-
-  ((x.coord[i] - x.coord[j]) ^ 2 + (y.coord[i] - y.coord[j]) ^ 2) ^ .5
-
-range <- 14446371
-sd.space <- 30000 # sd of b0_site
-V.space <- sd.space ^ 2 * exp(-Dist / range)
-rownames(V.space) <- 1:nsite
-colnames(V.space) <- 1:nsite
-V.space <- V.space / max(V.space)
-V.space <- V.space / exp(determinant(V.space)$modulus[1] / nsite)
-row.names(V.space) <- cell_id$id_cells
-colnames(V.space) <- cell_id$id_cells
-
-# new PGLMM offset with spatial correlation matrix
-pglmm_onset_sp <- pglmm(onset ~ temp + pop + prec + temp_seas + numObs + 
-                       diapause.stage + flights +
-                       (1|id_cells__) + (1|scientificName__) +
-                       (0 + temp | scientificName__) + 
-                       (0 + prec | scientificName__) +
-                       (0 + temp_seas | scientificName__) +
-                       temp:prec + temp:pop + 
-                       temp:diapause.stage + prec:flights,
-                     data = mdf_phylo_spp, 
-                     cov_ranef = list(scientificName = insect_tree4,
-                                      id_cells = V.space), 
-                     bayes = TRUE)
-
-summary(pglmm_onset_sp)
-rr2::R2(pglmm_onset_sp)

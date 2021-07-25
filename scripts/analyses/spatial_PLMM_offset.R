@@ -197,8 +197,8 @@ summary(pglmm_offset)
 re <- ranef(pglmm_offset) %>% knitr::kable()
 fe <- fixef(pglmm_offset) %>% knitr::kable()
 
-kableExtra::save_kable(fe, file = "Tables/resubmission/pglmm_FE_offset.html")
-kableExtra::save_kable(re, file = "Tables/resubmission/pglmm_RE_offset.html")
+kableExtra::save_kable(fe, file = "Tables/pglmm_FE_offset.html")
+kableExtra::save_kable(re, file = "Tables/pglmm_RE_offset.html")
 
 inla_offset = pglmm_offset$inla.model
 summary(inla_offset)
@@ -259,7 +259,7 @@ offset_correlogram_plot
 
 save(offset_correlogram_plot, file = "Figures/resubmission/offset_correlogram_plot.Rdata")
 
-
+## we see sig autocorrelation at the nearest distance class, so we will run spatial PGLMM
 ## Add spatial component to pglmm
 
 # set up spatial correlation covariance matrix
@@ -304,6 +304,10 @@ pglmm_offset_sp <- pglmm(offset ~ temp_seas + prec +
 summary(pglmm_offset_sp)
 rr2::R2(pglmm_offset_sp) # 0.580
 
+# save model output for faster figure making
+# note this line is commented out b/c it takes a while to do, if needed, please un-comment and run line
+# save(pglmm_offset_sp, file = "ModelOutputs/resubmission/pglmm_offset.Rdata")
+
 resids_sp <- resid(pglmm_offset_sp)
 rdf_sp <- mutate(mdf_phylo_spp, residuals = resids)
 
@@ -317,5 +321,5 @@ plot(fit_sp)
 re <- ranef(pglmm_offset_sp) %>% knitr::kable()
 fe <- fixef(pglmm_offset_sp) %>% knitr::kable()
 
-kableExtra::save_kable(fe, file = "Tables/resubmission/pglmm_FE_offset_spatial_correlation.html")
-kableExtra::save_kable(re, file = "Tables/resubmission/pglmm_RE_offset_spatial_correlation.html")
+kableExtra::save_kable(fe, file = "Tables/pglmm_FE_offset_spatial_correlation.html")
+kableExtra::save_kable(re, file = "Tables/pglmm_RE_offset_spatial_correlation.html")

@@ -167,8 +167,8 @@ summary(pglmm_duration)
 re <- ranef(pglmm_duration) %>% knitr::kable()
 fe <- fixef(pglmm_duration) %>% knitr::kable()
 
-kableExtra::save_kable(fe, file = "Tables/resubmission/pglmm_FE_duration.html")
-kableExtra::save_kable(re, file = "Tables/resubmission/pglmm_RE_duration.html")
+kableExtra::save_kable(fe, file = "Tables/pglmm_FE_duration.html")
+kableExtra::save_kable(re, file = "Tables/pglmm_RE_duration.html")
 
 inla_duration = pglmm_duration$inla.model
 summary(inla_duration)
@@ -226,7 +226,7 @@ duration_correlogram_plot <- ggplot() +
 duration_correlogram_plot
 
 save(duration_correlogram_plot, file = "Figures/resubmission/duration_correlogram_plot.Rdata")
-
+# spatial autocorrelation is detected at closest distance, so running Spatial PLMM
 
 ## ## Add spatial component to pglmm
 
@@ -272,6 +272,10 @@ pglmm_duration_sp <- pglmm(duration ~ temp + prec + temp_seas +
                         bayes = TRUE)
 
 summary(pglmm_duration_sp)
+
+# save model output for faster figure making
+# note this line is commented out b/c it takes a while to do, if needed, please un-comment and run line
+# save(pglmm_duration_sp, file = "ModelOutputs/resubmission/pglmm_duration.Rdata")
 
 ## save results
 resids_sp <- resid(pglmm_duration_sp)
