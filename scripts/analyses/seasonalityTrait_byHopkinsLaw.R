@@ -13,6 +13,7 @@ ggplot(mdf, mapping = aes(x = lon, y = lat, fill = onset)) +
   geom_tile() +
   theme_classic()
 
+# read in elevation data
 r <- raster("data/elevation_raster/elevation_NorthAmerica.tif")
 rproj <- projectRaster(r, crs =  "+proj=aea +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +datum=NAD83 +units=m +no_defs ")
 rdf <- raster::as.data.frame(rproj, xy = T) %>% 
@@ -24,11 +25,11 @@ ggplot() +
   scale_fill_viridis_c(na.value = "transparent") +
   theme_classic()
 
-
+# join model df to elevation df
 mdf2 <- left_join(mdf, rdf)
 
 coordinates(mdf) <- ~ lon + lat
-elev <- extract(rproj, mdf)
+elev <- extract(rproj, mdf) # extract elevation data
 
 mdf2 <- as.data.frame(mdf) %>% 
   dplyr::mutate(elevation = elev)
@@ -38,6 +39,7 @@ ggplot() +
   scale_fill_viridis_c(trans = "log", na.value = "transparent") +
   theme_classic()
 
+# find cell with lowest latitude
 lowest_cell <- mdf2 %>% 
   filter(lat == min(mdf2$lat))
 
@@ -64,7 +66,7 @@ ggplot() +
   scale_fill_gradient2() +
   theme_classic()
 
-
+# add hopkins correction to original onset estimates
 mdf4 <- mutate(mdf3, hopkins_onset = onset + hopkins_cor)
 
 spp_onset <- mdf4 %>% 
@@ -73,7 +75,7 @@ spp_onset <- mdf4 %>%
 
 ggplot() + 
   geom_histogram(spp_onset, mapping = aes(x = mean_onset), fill = "turquoise") +
-  geom_vline(xintercept = c(79, 172, 265))
+  geom_vline(xintercept = c(79, 172, 265)) +
   scale_y_continuous(expand = c(0,0)) +
   theme_bw() 
 
@@ -98,5 +100,5 @@ nrow(filter(mdf5, seas != seas2))
 t <- filter(mdf5, seas != seas2)
 unique(t$scientificName)
 head(mdf5)
-
+# write new Hopkins corrected seasonality trait
 write.csv(x = mdf5, file = "data/LMM_data/phenoTraits_data_withNumObsData_updatedSeasTrat.csv")
