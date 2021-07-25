@@ -11,7 +11,8 @@ Contains data that was used to estimate phenology metrics and data used in model
 Data used in linear mixed model and phylogeneitc linear mixed modeling framework. 
 - phenoTraits_data.csv have all estimated phenology metrics for species with trait data.
 - phenoTraits_data_withNumObsData.csv has climate variables in original values instead of scaled values to figure out what 1 s.d. of a variable was equal to.
-- phnoTraits_data_withNumObsData.csv has number of Obs term added to dataset. Note this is the dataset used in all mixed models.
+- phenoTraits_data_withNumObsData.csv has number of Obs term added to dataset. Note this is the dataset used in all mixed models.
+- phenoTraits_data_withNumObsData_updatedSeasTraits.csv has updates seasonality trait based on Hopkins-corrected methodology.
 
 ### occurrence records
 Occurrence records used to estimate phenometrics. These data were cleaned from original data sources to remove records that were not in our species list determined by needing 1000 iNaturalist observations within our 6 groups. We also removed records that did not have eventDate, decimalLongitude, or decimalLatitude information.
@@ -31,23 +32,27 @@ Subdirectory contianing .pngs of insect silhouttes used to generate Figure 1. Si
 Subdirectory containing trait information for species list, including the species that did not have completed trait information.
 
 ## Figures
-Subdirectory to save figures to. Contains raw .pngs of figures used in manuscript included Supporting Information figures. 
+Subdirectory to save figures to. Contains raw .pngs of figures used in manuscript included Supporting Information figures. Figure 1 and 2 of main text remained the same, so aare found in main Figures directory. The updated figures made as part of revising the manuscript due to reviewer and editor comments can be found in the resubmission subdirectory.
 
 ## scripts
 Contains R scripts used to generate phenology estimates, run analyses, and generate figures. Contains three subdirectories for these three aims.
 
 ### analyses
 Code to run data analyses (linear mixed models (LMM) and phylogenetic linear mixed models (PLMM))
-- onset_LMM_numObsTerm.R runs script to generate onset LMM and onset PLMM.
-- offset_LMM_numObsTerm.R runs script to generate offset LMM and offset PLMM.
-- duration_LMM_numObsTerm.R runs script to generate duration LMM and offset PLMM.
+- spatial_PLMM.R runs script to generate onset LMM and onset PLMM.
+- spatial_PLMM_offset.R runs script to generate offset LMM, offset PLMM, and offset PLMM with spatial term.
+- spatial_PLMM_duration.R runs script to generate duration LMM, duration PLMM, and duration PLMM with spatial term.
+- seasonalityTrait_byHopkinsLaw.R script to generate Hopkin's-corrected seasonality trait as described in Methods.
 
 ### figures
 Code to generate figures used in manuscript.
-- interactionFigures.R runs script to generate Figs. 3, 4, & 5
-- model_assumptions.R runs script to generate SI Fig. 1
-- R2_Fig.R runs script to generate SI Fig. 3
-- random_effects_posteriorDistributions.r runs scrip to generate SI Fig. 2
+- model_assumptions.R runs script to generate SI Fig. 2
+- MoransI_Fig.R script to generate SI Fig. 1
+- R2_Fig.R runs script to generate SI Fig. 4
+- RandomEffects_Figure.r runs script to generate SI Fig. 3
+- interaction_plots_duration.R script to generate Fig. 5
+- interaction_plots_offset.R script to generate Fig. 4
+- interaction_plots_onset.R script to generate Fig. 3
 - studyArea.R holds code to generate Fig. 2
 - studySpp.R has the code to generate Fig. 1
 
