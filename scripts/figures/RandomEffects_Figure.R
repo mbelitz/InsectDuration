@@ -1,85 +1,8 @@
 library(phyr)
-library(ape)
 library(tidyverse)
 library(stringr)
 
-# read in data
-mdf <- read.csv("data/LMM_data/phenoTraits_data_withNumObsData.csv", stringsAsFactors = FALSE) %>% 
-  filter(scientificName != "Diabrotica undecimpunctata") %>% 
-  mutate(numObs = scale(numObs))
-
-library(phyr)
-library(INLA)
-insect_tree3 = ape::read.tree("data/phylogeny/insect_test2.tre")
-plot(insect_tree3, type = "fan")
-
-insect_tree3$tip.label <- word(insect_tree3$tip.label, start = 1, end = 2, sep = "_") %>% 
-  sub(pattern = "_", replacement = " ")
-
-
-eusocial <- c("Bombus bimaculatus",
-              "Bombus fervidus",
-              "Bombus griseocollis",
-              "Bombus huntii",
-              "Bombus impatiens",
-              "Bombus melanopygus",
-              "Bombus pensylvanicus",
-              "Bombus sonorus",
-              "Bombus ternarius",
-              "Polistes fuscatus")
-
-tree_sp <- insect_tree3$tip.label
-
-mdf_phylo_spp <- mdf %>% 
-  filter(scientificName %in% tree_sp)
-
-insect_tree4 <- ape::drop.tip(phy = insect_tree3, tip = eusocial) %>% 
-  ape::drop.tip(tip = "Aeshna cyanea") %>% 
-  ape::drop.tip(tip = "Diabrotica undecimpunctata")
-
-pglmm_onset <- pglmm(onset ~ temp + pop + prec + temp_seas + numObs + 
-                       diapause.stage + flights +
-                       (1|id_cells) + (1|scientificName__) +
-                       (0 + temp | scientificName__) + 
-                       (0 + prec | scientificName__) +
-                       (0 + temp_seas | scientificName__) +
-                       temp:prec + temp:pop + 
-                       temp:diapause.stage + prec:flights,
-                     data = mdf_phylo_spp, 
-                     cov_ranef = list(scientificName = insect_tree4), 
-                     bayes = TRUE)
-
-
-# plot_bayes(pglmm_onset, sort = TRUE)
-
-## Offset
-
-pglmm_offset <- pglmm(offset ~ temp_seas + prec +
-                        seas + diapause.stage + immature.habitat + larval.diet + 
-                        temp_seas:diapause.stage +
-                        numObs + 
-                        (1 | id_cells) + (1 | scientificName__) + 
-                        (0 + temp_seas | scientificName__) + 
-                        (0 + prec | scientificName__), 
-                      data = mdf_phylo_spp, 
-                      cov_ranef = list(scientificName = insect_tree4), 
-                      bayes = TRUE)
-
-## Duration
-pglmm_duration <- pglmm(duration ~ temp + prec + temp_seas +
-                          diapause.stage + 
-                          immature.habitat +
-                          larval.diet + 
-                          numObs + 
-                          (1 | id_cells) + (1 | scientificName__) + 
-                          (0 + temp | scientificName__) + 
-                          (0 + prec | scientificName__) + 
-                          temp:prec + temp:larval.diet + temp:immature.habitat,
-                        data = mdf_phylo_spp, 
-                        cov_ranef = list(scientificName = insect_tree4), 
-                        bayes = TRUE)
-
-
+load("ModelOutputs/resubmission/pglmm_onset.Rdata")
 # Onset Posterior distributions
 
 x <- pglmm_onset
@@ -155,8 +78,9 @@ on_re_pd <- ggplot(re_on, aes(val, var, height = ..density..)) +
 #ggsave("NumObsResults/Figures/onset_RE.png", dpi = 400, plot = on_re_pd)
 
 # Offset Posterior distributions
+load("ModelOutputs/resubmission/pglmm_offset.Rdata")
 
-x <- pglmm_offset
+x <- pglmm_offset_sp
 n_samp <- 1000
 
 random_samps <- lapply(x$inla.model$marginals.hyperpar, 
@@ -229,7 +153,9 @@ off_re_pd <- ggplot(re_off, aes(val, var, height = ..density..)) +
 #ggsave("NumObsResults/Figures/offset_RE.png", dpi = 400, plot = off_re_pd)
 
 # Duration Posterior distributions
-x <- pglmm_duration
+load("ModelOutputs/resubmission/pglmm_duration.Rdata")
+
+x <- pglmm_duration_sp
 n_samp <- 1000
 
 random_samps <- lapply(x$inla.model$marginals.hyperpar, 
@@ -328,6 +254,7 @@ comb_re_pd <- ggplot(re_comb, aes(val, var, height = ..density..)) +
   theme(axis.text = element_text(size = 14),
         strip.text = element_text(size = 16)) 
 
-ggsave(filename = "Figures/RandomEffects_PosteriorDistribution.png", 
-       dpi = 400, height = 8, width = 8)
+comb_re_pd
 
+ggsave(filename = "Figures/resubmission/RandomEffects_PosteriorDistribution.png", 
+       dpi = 400, height = 8, width = 8)

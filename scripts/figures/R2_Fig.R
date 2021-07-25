@@ -6,29 +6,29 @@ library(ggplot2)
 
 ## Onset
 # Climate only models
-# R2m R2c 0.3560002 0.7688878
+# R2m R2c 0.355 0.769
 
 #Climate and Traits
 # R2m R2c 0.454863 0.7679138
 
 ## Offset
 # climate only models
-# 0.07578981 0.6529253
+# 0.0764 0.650
 
 #Climate and traits
-# 0.1879277 0.609447
+# 0.185 0.613
 
 ## Duration
 # climate only model
-# 0.3504058 0.7737233
+# 0.352 0.773
 
 # climate and traits
-# 0.4622136 0.7623328
+# 0.464 0.762
 
 #### PGLMMs
-#Onset #0.748
-#Offset # 0.580
-#Duration # 0.749
+#Onset #0.746
+#Offset # 0.579
+#Duration # 0.746
 
 r2s <- data.frame(model = c("Emergence", "Emergence", "Emergence", "Emergence", "Emergence", 
                             "Termination", "Termination", "Termination","Termination", "Termination",
@@ -39,9 +39,9 @@ r2s <- data.frame(model = c("Emergence", "Emergence", "Emergence", "Emergence", 
                   R2_type = c("Marginal", "Conditional", "Marginal", "Conditional", "Conditional",
                               "Marginal", "Conditional", "Marginal", "Conditional", "Conditional",
                               "Marginal", "Conditional", "Marginal", "Conditional", "Conditional"),
-                  R2 = c(0.3560002, 0.7688878, 0.454863, 0.7679138, 0.748,
-                         0.07578981, 0.6529253, 0.1879277, 0.609447, 0.580,
-                         0.3504058, 0.7737233, 0.4622136, 0.7623328, 0.749))
+                  R2 = c(0.355, 0.769, 0.454863, 0.7679138, 0.746,
+                         0.0764, 0.650, 0.185, 0.613, 0.579,
+                         0.352, 0.773, 0.464, 0.762, 0.746))
 
 mdf <- r2s %>% 
   mutate(model = factor(model, levels = c("Emergence", "Termination", "Duration")))
@@ -49,10 +49,10 @@ mdf <- r2s %>%
 R2_plot <- ggplot() + 
   # Plot conditional
   geom_bar( mdf,
-    stat = "identity",
-    position = "identity",
-    mapping = aes(x = model_type, y = R2, fill = R2_type)
-    ) +
+            stat = "identity",
+            position = "identity",
+            mapping = aes(x = model_type, y = R2, fill = R2_type)
+  ) +
   geom_bar( filter(mdf, R2_type == "Marginal"),
             stat = "identity",
             position = "identity",
@@ -62,7 +62,7 @@ R2_plot <- ggplot() +
     name = expression(R^2),
     limits = c(0,0.85) ,
     expand = c(0,0)
-    ) +
+  ) +
   scale_x_discrete(
     name = "Model Type"
   ) +
@@ -81,5 +81,5 @@ R2_plot <- ggplot() +
 
 R2_plot
 
-ggsave(plot = R2_plot, filename = "Figures/R2.png",
+ggsave(plot = R2_plot, filename = "Figures/resubmission/R2.png",
        width = 5, height = 4)
