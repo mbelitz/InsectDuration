@@ -5,6 +5,8 @@ library(car)
 library(kableExtra)
 library(sjPlot)
 library(geoR)
+library(spdep)
+library(DHARMa)
 
 # read in data
 # removed D. undecimpunctata from analyses b/c there is no true diapause in this species
@@ -62,8 +64,8 @@ on_top <- lmer(onset ~ temp + pop + prec + temp_seas + temp:pop + temp:prec +
 
 summary(on_top)
 car::vif(on_top)
-plot_model(on_top, type = "pred", terms = c("temp", "prec"), ci.lvl = NA)
-plot_model(on_top, type = "pred", terms = c("temp", "pop"), ci.lvl = NA)
+plot_model(on_top, type = "pred", terms = c("temp", "prec"))
+plot_model(on_top, type = "pred", terms = c("temp", "pop"))
 MuMIn::r.squaredGLMM(on_top) # R2m 0.355  R2c 0.769
 
 
@@ -112,15 +114,14 @@ on_traits_top_s
 
 summary(on_traits_top)
 car::vif(on_traits_top)
-plot_model(on_traits_top, type = "pred", terms = c("temp", "prec"), ci.lvl = NA)
-plot_model(on_traits_top, type = "pred", terms = c("temp", "pop"), ci.lvl = NA)
-plot_model(on_traits_top, type = "pred", terms = c("temp", "diapause.stage"), ci.lvl = NA)
-plot_model(on_traits_top, type = "pred", terms = c("prec", "flights"), ci.lvl = NA)
+plot_model(on_traits_top, type = "pred", terms = c("temp", "prec"))
+plot_model(on_traits_top, type = "pred", terms = c("temp", "pop"))
+plot_model(on_traits_top, type = "pred", terms = c("temp", "diapause.stage"))
+plot_model(on_traits_top, type = "pred", terms = c("prec", "flights"))
 MuMIn::r.squaredGLMM(on_traits_top) ## R2m = 0.454 R2c = 0.768
 
 ### PLMM #########
 # use package phyr and inla to generate phylogenetic linear mixed models
-
 library(phyr)
 library(INLA)
 # read in phylogeny
@@ -173,9 +174,8 @@ re <- phyr::ranef(pglmm_onset) %>%
 fe <- phyr::fixef(pglmm_onset) %>% 
   knitr::kable() 
 
-kableExtra::save_kable(fe, file = "Tables/pglmm_FE_onset.html")
-kableExtra::save_kable(re, file = "Tables/pglmm_RE_onset.html")
-
+kableExtra::save_kable(fe, file = "Tables/resubmission/pglmm_FE_onset.html")
+kableExtra::save_kable(re, file = "Tables/resubmission/pglmm_RE_onset.html")
 
 inla_onset = pglmm_onset$inla.model
 summary(inla_onset)
@@ -201,5 +201,78 @@ v1 <- variog(gdf, trend = "1st")
 plot(v1)
 
 ## Goodness of fit
+rr2::R2(pglmm_onset) #0.746
 
-rr2::R2(pglmm_onset) #0.747
+## Examine spatial autocorrelation a second 
+library(ncf)
+rdf <- mutate(mdf_phylo_spp, residuals = resids)
+
+fit3 = correlog(x = rdf$lon, y = rdf$lat, z = rdf$residuals,
+                increment = 25000, latlon = F, resamp = 100)
+plot(fit3)
+
+fit3_df <- data.frame(distance = fit3$mean.of.class, 
+                      correlation = fit3$correlation,
+                      p.value = if_else(fit3$p < 0.025, 
+                                        true = "Sig",
+                                        false = "Not Sig")) %>% 
+  filter(distance < 500000 & distance > 1)
+
+
+onset_correlogram_plot <- ggplot() +
+  geom_line(fit3_df,
+            mapping = aes(x = distance, y = correlation)) +
+  geom_point(fit3_df,
+             mapping = aes(x = distance, y = correlation, fill = p.value),
+             size = 3, shape = 21, color = "black") +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  scale_fill_manual(values = c("white", "black")) +
+  labs(x = "Distance", y = "Moran's I", fill = "P-Value") +
+  theme_classic()
+
+save(onset_correlogram_plot, file = "Figures/resubmission/onset_correlogram_plot.Rdata")
+
+## Add spatial component to pglmm
+
+# set up spatial correlation covariance matrix
+## grab coordinates for each unique cell
+cell_id <- dplyr::distinct(mdf_phylo_spp, id_cells, .keep_all = T) %>% 
+  dplyr::select(id_cells, lon, lat)
+x.coord <- cell_id$lon
+y.coord <- cell_id$lat
+
+nsite <- length(x.coord)
+
+# generate matrix
+Dist <- matrix(0, nrow = nsite, ncol = nsite)
+for (i in 1:nsite)
+  for (j in 1:nsite)
+    Dist[i, j] <-
+  ((x.coord[i] - x.coord[j]) ^ 2 + (y.coord[i] - y.coord[j]) ^ 2) ^ .5
+
+range <- 14446371
+sd.space <- 30000 # sd of b0_site
+V.space <- sd.space ^ 2 * exp(-Dist / range)
+rownames(V.space) <- 1:nsite
+colnames(V.space) <- 1:nsite
+V.space <- V.space / max(V.space)
+V.space <- V.space / exp(determinant(V.space)$modulus[1] / nsite)
+row.names(V.space) <- cell_id$id_cells
+colnames(V.space) <- cell_id$id_cells
+
+# new PGLMM offset with spatial correlation matrix
+pglmm_onset_sp <- pglmm(onset ~ temp + pop + prec + temp_seas + numObs + 
+                       diapause.stage + flights +
+                       (1|id_cells__) + (1|scientificName__) +
+                       (0 + temp | scientificName__) + 
+                       (0 + prec | scientificName__) +
+                       (0 + temp_seas | scientificName__) +
+                       temp:prec + temp:pop + 
+                       temp:diapause.stage + prec:flights,
+                     data = mdf_phylo_spp, 
+                     cov_ranef = list(scientificName = insect_tree4,
+                                      id_cells = V.space), 
+                     bayes = TRUE)
+
+summary(pglmm_onset_sp)
+rr2::R2(pglmm_onset_sp)
