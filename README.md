@@ -12,7 +12,8 @@ Data used in linear mixed model and phylogeneitc linear mixed modeling framework
 - phenoTraits_data.csv have all estimated phenology metrics for species with trait data.
 - phenoTraits_data_withNumObsData.csv has climate variables in original values instead of scaled values to figure out what 1 s.d. of a variable was equal to.
 - phenoTraits_data_withNumObsData.csv has number of Obs term added to dataset. Note this is the dataset used in all mixed models.
-- phenoTraits_data_withNumObsData_updatedSeasTraits.csv has updates seasonality trait based on Hopkins-corrected methodology.
+- phenoTraits_data_withNumObsData_updatedSeasTrats.csv has updates seasonality trait based on Hopkins-corrected methodology.
+  *read me provides metadata that explains columns and rows of phenoTraits_data_withNumObsData_updatedSeasTrats.csv, which was used to generate all results of the manuscript.
 
 ### occurrence records
 Occurrence records used to estimate phenometrics. These data were cleaned from original data sources to remove records that were not in our species list determined by needing 1000 iNaturalist observations within our 6 groups. We also removed records that did not have eventDate, decimalLongitude, or decimalLatitude information.
